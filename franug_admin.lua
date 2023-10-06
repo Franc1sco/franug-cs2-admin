@@ -1,4 +1,4 @@
-adminPassword = "franugmolaxdcola"
+local adminpassword = "yourpassword"
 
 local connectedPlayers = {}
 local activeAdmins = {}
@@ -60,6 +60,22 @@ function table.GetValueByName(tbl, value)
     return nil
 end
 
+function table.GetUserIdFromPawn(tbl, value)
+    for i = #tbl, 1, -1 do
+        if tbl[i].pawn ~= nil then
+            --print("lista con numero "..i.. "pawn es ")
+            print(EHandleToHScript(tbl[i].pawn))
+            --print("buscando pawn ")
+            print(value)
+            if EHandleToHScript(tbl[i].pawn) == value then
+                --print("encontrado con userid "..tbl[i].userid)
+                return tbl[i].userid
+            end
+        end
+    end
+    return nil
+end
+
 function EHandleToHScript(iPawnId)
     return EntIndexToHScript(bit.band(iPawnId, 0x3FFF))
 end
@@ -75,12 +91,20 @@ function addAdmin(activeAdmins, admin)
     table.insert(activeAdmins, admin)
 end
 
+--Convars:RegisterConvar("franugadmin_password", "yourpassword", "Put here the password that you want for admin login", FCVAR_DONTRECORD)
+
 Convars:RegisterCommand( "adminlogin" , function (_, pw)
     local password = tostring (pw) or  30
-    
-    if password == adminPassword then
+    --print("pass introducida es "..password)
+    --print("pass correcta "..Convars:GetStr("franugadmin_password"))
+    --if password == Convars:GetStr("franugadmin_password") then
+    if password == adminpassword then
         local admin = Convars:GetCommandClient()
         addAdmin(activeAdmins, admin)
+        --local userid = table.GetUserIdFromPawn(connectedPlayers, admin)
+        --if userid ~= nil then
+            --UTIL_MessageText(userid, "Admin login sucess", 0, 255, 0, 255)
+        --end
         print("admin logged in")
     end
 end, nil , FCVAR_PROTECTED)
@@ -354,6 +378,24 @@ function AdminOnPlayerSpawn(event)
 	--connectedPlayers[event.userid] = nil
 end
 
+function AdminOnTeam(event)
+    local usertableid = table.GetValue(connectedPlayers, event.userid)
+    if usertableid ~= nil then
+        table.RemoveValue(connectedPlayers, usertableid)
+        local playerData = {
+            name = usertableid.name,
+            userid = event.userid,
+            networkid = usertableid.networkid,
+            address = usertableid.address,
+            pawn = event.userid_pawn
+        }
+        table.insert(connectedPlayers, playerData)
+        --print("re spawned con pawn "..event.userid_pawn)
+    end
+	--connectedPlayers[event.userid] = nil
+end
+
+
 --if tListenerIds then
     --for k, v in ipairs(tListenerIds) do
         --StopListeningToGameEvent(v)
@@ -363,5 +405,6 @@ end
 tListenerIds = {
     ListenToGameEvent("player_connect", AdminOnPlayerConnect, nil),
     ListenToGameEvent("player_disconnect", AdminOnPlayerDisconnect, nil),
-    ListenToGameEvent("player_spawn", AdminOnPlayerSpawn, nil)
+    ListenToGameEvent("player_spawn", AdminOnPlayerSpawn, nil),
+    ListenToGameEvent("player_team", AdminOnTeam, nil)
 }
