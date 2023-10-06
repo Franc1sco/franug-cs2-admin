@@ -1,11 +1,7 @@
-adminPassword = "franugmolaxd"
+adminPassword = "franugmolaxdcola"
 
 local connectedPlayers = {}
 local activeAdmins = {}
-
-local bannedPlayers = { -- You can add players to the banlist using their SteamID3
-    "[U:1:372278500]",
-}
 
 function tableContains(table, value)
     for _, v in pairs(table) do
@@ -32,6 +28,40 @@ function ExistPlayer(userid)
     else
         return false
     end
+end
+
+-- removes all instances of a given value
+-- from a given table
+function table.RemoveValue(tbl, value)
+    for i = #tbl, 1, -1 do
+        if tbl[i] == value then
+            table.remove(tbl, i)
+        end
+    end
+end
+
+function table.GetValue(tbl, value)
+    for i = #tbl, 1, -1 do
+        --print("lista con numero "..i.. " id es "..tbl[i].userid.. " buscando id "..value)
+        if tbl[i].userid == value then
+            return tbl[i]
+        end
+    end
+    return nil
+end
+
+function table.GetValueByName(tbl, value)
+    for i, name in ipairs(tbl) do
+        --print("lista con numero "..i.. "name es "..tbl[i].name.. " buscando name "..value)
+        if string.find(string.lower(tbl[i].name), string.lower(value), 1, true) then
+            return tbl[i]
+        end
+    end
+    return nil
+end
+
+function EHandleToHScript(iPawnId)
+    return EntIndexToHScript(bit.band(iPawnId, 0x3FFF))
 end
 
 function addAdmin(activeAdmins, admin)
@@ -69,7 +99,6 @@ end, nil , FCVAR_PROTECTED)
 
 Convars:RegisterCommand( "sm_rcon" , function (_, args)
     local user = Convars:GetCommandClient()
-    --print(msg)
 
     if tableContains(activeAdmins, user) then
         local msg = tostring(args)
@@ -104,19 +133,202 @@ Convars:RegisterCommand( "sm_map" , function (_, args)
     end
 end, nil , FCVAR_PROTECTED)
 
---function OnPlayerConnect(event)
-	--local playerData = {
-		--name = event.name,
-		--userid = event.userid,
-		--networkid = event.networkid,
-		--address = event.address
-	--}
-	--connectedPlayers[event.userid] = playerData
---end
+Convars:RegisterCommand( "sm_slay" , function (_, args)
+    local user = Convars:GetCommandClient()
+    --print(msg)
+    --user.GetEntityIndex()
 
---function OnPlayerDisconnect(event)
+    if tableContains(activeAdmins, user) then
+        --local msg = tonumber(args) or 0
+        local msg = tostring(args)
+        print(msg)
+        --local msgfix = msg + 1 
+        -- TODO
+        --local usertableid = table.GetValue(connectedPlayers, msg)
+        local userid = table.GetValueByName(connectedPlayers, msg)
+        if userid == nil then
+            userid = table.GetValue(connectedPlayers, tonumber(msg))
+        end
+        if userid == nil then
+            return
+        end
+        --local usertablepawn = UserIDToControllerHScript(userid.userid)
+        local usertablepawn = EHandleToHScript(userid.pawn)
+        print(usertablepawn)
+        if usertablepawn ~= nil then
+            --local target = usertablepawn:GetPawn()
+            --if target ~= nil and target:IsAlive() then
+            --if usertablepawn:IsAlive() then
+                --print("pasado")
+                --local username = table.GetValue(connectedPlayers, msg).name
+                local username = userid.name
+                --print("pasado y encontrado")
+                DoEntFireByInstanceHandle(usertablepawn, "SetHealth", "0", 0.1, nil, nil)
+                ScriptPrintMessageChatAll(" \x05[ADMIN]: slayed player "..username)
+                --table.RemoveValue(connectedPlayers, usertableid)
+            --end
+        end
+    end
+end, nil , FCVAR_PROTECTED)
+
+Convars:RegisterCommand( "sm_hp" , function (_, args, args2)
+    local user = Convars:GetCommandClient()
+
+    if tableContains(activeAdmins, user) then
+        local msg = tostring(args)
+        local msg2 = tonumber(args2) or 100
+
+        local userid = table.GetValueByName(connectedPlayers, msg)
+
+        if userid == nil then
+            userid = table.GetValue(connectedPlayers, tonumber(msg))
+        end
+        if userid == nil then
+            return
+        end
+
+        local usertablepawn = EHandleToHScript(userid.pawn)
+        if usertablepawn ~= nil then
+            local username = userid.name
+            --DoEntFireByInstanceHandle(usertablepawn, "SetHealth", msg2, 0.1, nil, nil)
+            usertablepawn:SetHealth(msg2)
+            ScriptPrintMessageChatAll(" \x05[ADMIN]: set "..msg2.." hp on player "..username)
+        end
+    end
+end, nil , FCVAR_PROTECTED)
+
+Convars:RegisterCommand( "sm_burn" , function (_, args, args2)
+    local user = Convars:GetCommandClient()
+
+    if tableContains(activeAdmins, user) then
+        local msg = tostring(args)
+
+        local userid = table.GetValueByName(connectedPlayers, tonumber(msg))
+
+        if userid == nil then
+            userid = table.GetValue(connectedPlayers, msg)
+        end
+        if userid == nil then
+            return
+        end
+
+        local usertablepawn = EHandleToHScript(userid.pawn)
+        if usertablepawn ~= nil then
+            local username = userid.name
+            DoEntFireByInstanceHandle(usertablepawn, "Ignite", "", 0.1, usertablepawn, usertablepawn)
+            ScriptPrintMessageChatAll(" \x05[ADMIN]: Ignite player "..username)
+        end
+    end
+end, nil , FCVAR_PROTECTED)
+
+Convars:RegisterCommand( "sm_fakesay" , function (_, args, args2)
+    local user = Convars:GetCommandClient()
+
+    if tableContains(activeAdmins, user) then
+        local msg = tostring(args)
+        local msg2 = tostring(args2) or "xd"
+
+        local userid = table.GetValueByName(connectedPlayers, msg)
+
+        if userid == nil then
+            userid = table.GetValue(connectedPlayers, tonumber(msg))
+        end
+        if userid == nil then
+            return
+        end
+
+        local usertablepawn = EHandleToHScript(userid.pawn)
+        if usertablepawn ~= nil then
+            --local username = userid.name
+            --DoEntFireByInstanceHandle(usertablepawn, "SetHealth", msg2, 0.1, nil, nil)
+            Say(usertablepawn, msg2, false)
+            --ScriptPrintMessageChatAll(" \x05[FRANUG ADMIN]: set "..msg2.." hp on player "..username)
+        end
+    end
+end, nil , FCVAR_PROTECTED)
+
+Convars:RegisterCommand( "sm_team" , function (_, args, args2)
+    local user = Convars:GetCommandClient()
+
+    if tableContains(activeAdmins, user) then
+        local msg = tostring(args)
+        local msg2 = tonumber(args2) or 1
+
+        local userid = table.GetValueByName(connectedPlayers, msg)
+
+        if userid == nil then
+            userid = table.GetValue(connectedPlayers, tonumber(msg))
+        end
+        if userid == nil then
+            return
+        end
+
+        local usertablepawn = EHandleToHScript(userid.pawn)
+        if usertablepawn ~= nil then
+            local username = userid.name
+            --DoEntFireByInstanceHandle(usertablepawn, "SetHealth", msg2, 0.1, nil, nil)
+            usertablepawn:SetTeam(msg2)
+            ScriptPrintMessageChatAll(" \x05[ADMIN]: set team "..msg2.." on player "..username)
+        end
+    end
+end, nil , FCVAR_PROTECTED)
+
+Convars:RegisterCommand( "sm_rr" , function (_, args)
+    local user = Convars:GetCommandClient()
+
+    if tableContains(activeAdmins, user) then
+        SendToServerConsole("mp_restartgame 2")
+        ScriptPrintMessageChatAll(" \x05[ADMIN]: restarting game...")
+    end
+end, nil , FCVAR_PROTECTED)
+
+Convars:RegisterCommand( "sm_respawn" , function (_, args)
+    local user = Convars:GetCommandClient()
+
+    if tableContains(activeAdmins, user) then
+        ScriptCoopMissionRespawnDeadPlayers() -- no funciona :(
+        ScriptPrintMessageChatAll(" \x05[ADMIN]: respawned dead players")
+    end
+end, nil , FCVAR_PROTECTED)
+
+function AdminOnPlayerConnect(event)
+	local playerData = {
+		name = event.name,
+		userid = event.userid,
+		networkid = event.networkid,
+		address = event.address,
+        --pawn = EHandleToHScript(event.userid_pawn)
+	}
+    table.insert(connectedPlayers, playerData)
+    --print("conectado")
+	--connectedPlayers[event.userid] = playerData
+end
+
+function AdminOnPlayerDisconnect(event)
+    local usertableid = table.GetValue(connectedPlayers, event.userid)
+    if usertableid ~= nil then
+        table.RemoveValue(connectedPlayers, usertableid)
+    end
+    --print("desconectado")
 	--connectedPlayers[event.userid] = nil
---end
+end
+
+function AdminOnPlayerSpawn(event)
+    local usertableid = table.GetValue(connectedPlayers, event.userid)
+    if usertableid ~= nil then
+        table.RemoveValue(connectedPlayers, usertableid)
+        local playerData = {
+            name = usertableid.name,
+            userid = event.userid,
+            networkid = usertableid.networkid,
+            address = usertableid.address,
+            pawn = event.userid_pawn
+        }
+        table.insert(connectedPlayers, playerData)
+        --print("re spawned con pawn "..event.userid_pawn)
+    end
+	--connectedPlayers[event.userid] = nil
+end
 
 --if tListenerIds then
     --for k, v in ipairs(tListenerIds) do
@@ -124,7 +336,8 @@ end, nil , FCVAR_PROTECTED)
     --end
 --end
 
---tListenerIds = {
-    --ListenToGameEvent("player_connect", OnPlayerConnect, nil),
-    --ListenToGameEvent("player_disconnect", OnPlayerDisconnect, nil)
---}
+tListenerIds = {
+    ListenToGameEvent("player_connect", AdminOnPlayerConnect, nil),
+    ListenToGameEvent("player_disconnect", AdminOnPlayerDisconnect, nil),
+    ListenToGameEvent("player_spawn", AdminOnPlayerSpawn, nil)
+}
