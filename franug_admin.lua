@@ -89,11 +89,35 @@ Convars:RegisterCommand( "sm_kick" , function (_, args)
     local user = Convars:GetCommandClient()
 
     if tableContains(activeAdmins, user) then
-        --if ExistPlayer(userid) then
-            local msg = tostring(args)
-            SendToServerConsole("kickid " .. msg .. " kicked by server admin")
-            ScriptPrintMessageChatAll(" \x05ADMIN: userid " ..msg .. " kicked from the server")
-        --end
+        --local msg = tonumber(args) or 0
+        local msg = tostring(args)
+        --print(msg)
+        --local msgfix = msg + 1 
+        -- TODO
+        --local usertableid = table.GetValue(connectedPlayers, msg)
+        local userid = table.GetValueByName(connectedPlayers, msg)
+        if userid == nil then
+            userid = table.GetValue(connectedPlayers, tonumber(msg))
+        end
+        if userid == nil then
+            return
+        end
+        --local usertablepawn = UserIDToControllerHScript(userid.userid)
+        local usertablepawn = EHandleToHScript(userid.pawn)
+        print(usertablepawn)
+        if usertablepawn ~= nil then
+            --local target = usertablepawn:GetPawn()
+            --if target ~= nil and target:IsAlive() then
+            --if usertablepawn:IsAlive() then
+                --print("pasado")
+                --local username = table.GetValue(connectedPlayers, msg).name
+                local username = userid.name
+                --print("pasado y encontrado")
+                ScriptPrintMessageChatAll(" \x05[ADMIN]: kicked player "..username)
+                SendToServerConsole("kickid " .. userid.userid .. " kicked by server admin")
+                --table.RemoveValue(connectedPlayers, usertableid)
+            --end
+        end
     end
 end, nil , FCVAR_PROTECTED)
 
@@ -141,7 +165,7 @@ Convars:RegisterCommand( "sm_slay" , function (_, args)
     if tableContains(activeAdmins, user) then
         --local msg = tonumber(args) or 0
         local msg = tostring(args)
-        print(msg)
+        --print(msg)
         --local msgfix = msg + 1 
         -- TODO
         --local usertableid = table.GetValue(connectedPlayers, msg)
