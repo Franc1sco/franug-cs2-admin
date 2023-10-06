@@ -157,7 +157,7 @@ Convars:RegisterCommand( "sm_kick" , function (_, args)
         end
         --local usertablepawn = UserIDToControllerHScript(userid.userid)
         local usertablepawn = EHandleToHScript(userid.pawn)
-        print(usertablepawn)
+        --print(usertablepawn)
         if usertablepawn ~= nil then
             --local target = usertablepawn:GetPawn()
             --if target ~= nil and target:IsAlive() then
@@ -231,7 +231,7 @@ Convars:RegisterCommand( "sm_slay" , function (_, args)
         end
         --local usertablepawn = UserIDToControllerHScript(userid.userid)
         local usertablepawn = EHandleToHScript(userid.pawn)
-        print(usertablepawn)
+        --print(usertablepawn)
         if usertablepawn ~= nil then
             --local target = usertablepawn:GetPawn()
             --if target ~= nil and target:IsAlive() then
