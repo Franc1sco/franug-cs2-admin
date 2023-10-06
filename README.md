@@ -13,6 +13,7 @@
 * Set your admin password into the .lua file on the first line "yourpassword"
 * Join to your server and put in your console: adminlogin "yourpassword"
 * Now you have access to the admin commands
+* Also you can add admins by steamid into the adminlist.lua file, so you will dont need a password.
 
 ### Admin commands
 

@@ -1,5 +1,8 @@
 local adminpassword = "yourpassword"
 
+
+require("adminlist")
+
 local connectedPlayers = {}
 local activeAdmins = {}
 
@@ -64,12 +67,38 @@ function table.GetUserIdFromPawn(tbl, value)
     for i = #tbl, 1, -1 do
         if tbl[i].pawn ~= nil then
             --print("lista con numero "..i.. "pawn es ")
-            print(EHandleToHScript(tbl[i].pawn))
+            --print(EHandleToHScript(tbl[i].pawn))
             --print("buscando pawn ")
-            print(value)
+            --print(value)
             if EHandleToHScript(tbl[i].pawn) == value then
                 --print("encontrado con userid "..tbl[i].userid)
                 return tbl[i].userid
+            end
+        end
+    end
+    return nil
+end
+
+function IsAdmin(user)
+    local steamid = table.GetSteamIdFromPawn(connectedPlayers, user)
+    if steamid ~= nil then
+        if tableContains(AdminList, steamid) then
+            return true
+        end
+    end
+    return false
+end
+
+function table.GetSteamIdFromPawn(tbl, value)
+    for i = #tbl, 1, -1 do
+        if tbl[i].pawn ~= nil then
+            --print("lista con numero "..i.. "pawn es ")
+            --print(EHandleToHScript(tbl[i].pawn))
+            --print("buscando pawn ")
+            --print(value)
+            if EHandleToHScript(tbl[i].pawn) == value then
+                --print("encontrado con userid "..tbl[i].userid)
+                return tbl[i].networkid
             end
         end
     end
@@ -112,7 +141,7 @@ end, nil , FCVAR_PROTECTED)
 Convars:RegisterCommand( "sm_kick" , function (_, args)
     local user = Convars:GetCommandClient()
 
-    if tableContains(activeAdmins, user) then
+    if IsAdmin(user) or tableContains(activeAdmins, user) then
         --local msg = tonumber(args) or 0
         local msg = tostring(args)
         --print(msg)
@@ -148,7 +177,7 @@ end, nil , FCVAR_PROTECTED)
 Convars:RegisterCommand( "sm_rcon" , function (_, args)
     local user = Convars:GetCommandClient()
 
-    if tableContains(activeAdmins, user) then
+    if IsAdmin(user) or tableContains(activeAdmins, user) then
         local msg = tostring(args)
         SendToServerConsole(msg)
     end
@@ -159,7 +188,7 @@ Convars:RegisterCommand( "sm_say" , function (_, args)
     --print(msg)
     --user.GetEntityIndex()
 
-    if tableContains(activeAdmins, user) then
+    if IsAdmin(user) or tableContains(activeAdmins, user) then
         local msg = tostring(args)
         --print("hecho con "..msg)
         ScriptPrintMessageChatAll(" \x05ADMIN: "..msg)
@@ -172,7 +201,7 @@ Convars:RegisterCommand( "sm_map" , function (_, args)
     --print(msg)
     --user.GetEntityIndex()
 
-    if tableContains(activeAdmins, user) then
+    if IsAdmin(user) or tableContains(activeAdmins, user) then
         local msg = tostring(args)
         --print("hecho con "..msg)
         ScriptPrintMessageChatAll(" \x05ADMIN: changing map to "..msg)
@@ -186,7 +215,7 @@ Convars:RegisterCommand( "sm_slay" , function (_, args)
     --print(msg)
     --user.GetEntityIndex()
 
-    if tableContains(activeAdmins, user) then
+    if IsAdmin(user) or tableContains(activeAdmins, user) then
         --local msg = tonumber(args) or 0
         local msg = tostring(args)
         --print(msg)
@@ -222,7 +251,7 @@ end, nil , FCVAR_PROTECTED)
 Convars:RegisterCommand( "sm_hp" , function (_, args, args2)
     local user = Convars:GetCommandClient()
 
-    if tableContains(activeAdmins, user) then
+    if IsAdmin(user) or tableContains(activeAdmins, user) then
         local msg = tostring(args)
         local msg2 = tonumber(args2) or 100
 
@@ -248,7 +277,7 @@ end, nil , FCVAR_PROTECTED)
 Convars:RegisterCommand( "sm_burn" , function (_, args, args2)
     local user = Convars:GetCommandClient()
 
-    if tableContains(activeAdmins, user) then
+    if IsAdmin(user) or tableContains(activeAdmins, user) then
         local msg = tostring(args)
 
         local userid = table.GetValueByName(connectedPlayers, tonumber(msg))
@@ -272,7 +301,7 @@ end, nil , FCVAR_PROTECTED)
 Convars:RegisterCommand( "sm_fakesay" , function (_, args, args2)
     local user = Convars:GetCommandClient()
 
-    if tableContains(activeAdmins, user) then
+    if IsAdmin(user) or tableContains(activeAdmins, user) then
         local msg = tostring(args)
         local msg2 = tostring(args2) or "xd"
 
@@ -298,7 +327,7 @@ end, nil , FCVAR_PROTECTED)
 Convars:RegisterCommand( "sm_team" , function (_, args, args2)
     local user = Convars:GetCommandClient()
 
-    if tableContains(activeAdmins, user) then
+    if IsAdmin(user) or tableContains(activeAdmins, user) then
         local msg = tostring(args)
         local msg2 = tonumber(args2) or 1
 
@@ -324,7 +353,7 @@ end, nil , FCVAR_PROTECTED)
 Convars:RegisterCommand( "sm_rr" , function (_, args)
     local user = Convars:GetCommandClient()
 
-    if tableContains(activeAdmins, user) then
+    if IsAdmin(user) or tableContains(activeAdmins, user) then
         SendToServerConsole("mp_restartgame 2")
         ScriptPrintMessageChatAll(" \x05[ADMIN]: restarting game...")
     end
@@ -333,7 +362,7 @@ end, nil , FCVAR_PROTECTED)
 Convars:RegisterCommand( "sm_respawn" , function (_, args)
     local user = Convars:GetCommandClient()
 
-    if tableContains(activeAdmins, user) then
+    if IsAdmin(user) or tableContains(activeAdmins, user) then
         ScriptCoopMissionRespawnDeadPlayers() -- no funciona :(
         ScriptPrintMessageChatAll(" \x05[ADMIN]: respawned dead players")
     end
