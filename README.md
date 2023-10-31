@@ -8,6 +8,19 @@
 * Add **sv_cheats 1; script_reload_code franug_admin; sv_cheats 0** to the bottom of your server.cfg
 * Restart your server
 
+# Extra commands
+
+* !ban <name> <duration/0 (permanent)>
+* !mute <name> <duration/0 (permanent)>
+* !unmute <name>
+* !gag <name> <duration/0 (permanent)>
+* !ungag <name>
+* !goto <name>
+* !bring <name>
+* !give <name> <weapon>
+
+Require metamod plugin: https://mega.nz/file/uFlhFDKI#gqTzWDNI-50SXijxU2DzwepHtfZK2TMw5KT-mmhet-g
+
 ### Configuration
 
 * Set your admin password into the .lua file on the first line "yourpassword"
